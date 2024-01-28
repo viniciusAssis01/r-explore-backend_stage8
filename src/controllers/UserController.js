@@ -3,14 +3,6 @@ const sqliteConnection = require("../database/sqlite");
 const AppError = require("../utils/AppError");
 
 class UserController {
-	//antes de criar as funcionalidades, crie as requisições lá no insomnia, para vc saber como virão os dados da requisição
-	/* lembrando que, por boas praticas, um controller pode ter até 5 métodos:
-  --index: pra listar varios registros (get)
-  --show: listar um registro especifico (get)
-  --create: criar um registro (post)
-  --update: atualizar um registro (put/patch)
-  --delete: deletar um registro (delete)
-  */
 	async create(request, response) {
 		const { name, email, password } = request.body;
 
@@ -31,22 +23,22 @@ class UserController {
 			"INSERT INTO users (name, email, password) VALUES (?, ?, ?)",
 			[name, email, hashedPassword]
 		);
-		response.status(201).json({});
+		return response.status(201).json({});
 	}
 
 	async update(request, response) {
 		const { name, email, password, old_password } = request.body;
-		const { id } = request.params;
+		const user_id = request.user.id;
 
 		const database = await sqliteConnection();
 		//selecionando usuario
-		const user = await database.get("SELECT * FROM users WHERE id = (?)", [id]);
+		const user = await database.get("SELECT * FROM users WHERE id = (?)", [
+			user_id,
+		]);
 
 		if (!user) {
 			throw new AppError("Usuário não encontrado");
 		}
-
-		//verificando se o novo email ja existe no DB
 		const userWithUpdateEmail = await database.get(
 			"SELECT * FROM users WHERE email = (?)",
 			[email]
@@ -55,8 +47,6 @@ class UserController {
 			throw new AppError("E-mail ja cadastrado");
 		}
 
-		//reatribuindo os valores das propriedades
-		//nullish coalescing operator(??) para caso ñ seja passado, deixarmos um valor padrão
 		user.name = name ?? user.name;
 		user.email = email ?? user.email;
 
@@ -82,7 +72,7 @@ class UserController {
 			password = ?,
 			updated_at = DATETIME("now")
 			WHERE id = ?`,
-			[user.name, user.email, user.password, id]
+			[user.name, user.email, user.password, user_id]
 		);
 
 		return response.status(200).json();
