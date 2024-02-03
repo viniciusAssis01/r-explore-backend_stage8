@@ -54,7 +54,7 @@ class MovieNotesController {
 		const user_id = request.user.id;
 
 		const movieNotes = await knex("movie_notes")
-			.select(["id", "title", "description", "user_id"])
+			.select(["id", "title", "description", "user_id", "rating"])
 			.where({ user_id })
 			.whereLike("title", `%${title}%`)
 			.orderBy("title");
