@@ -36,7 +36,7 @@ app.use((error, request, response, next) => {
 	});
 });
 
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.PORT || 3000;
 const runningMsg = `server running on http://localhost:${PORT}`;
 
 app.listen(PORT, () => {
